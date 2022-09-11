@@ -14,3 +14,11 @@ land x y = if x == T
               then y
               else F
 
+lnot :: Boolean -> Boolean
+lnot F = T
+lnot _ = F
+
+-- :/ oops
+ifthenelse :: Boolean -> a -> a -> a
+ifthenelse T x _ = x
+ifthenelse F _ y = y
