@@ -1,6 +1,6 @@
 module Lista where
 
-data ListaInt a b = a ++ ListaInt b
+data ListInt a b = a ++ ListInt b
         deriving ( Show , Eq )
 
 
