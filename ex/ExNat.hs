@@ -35,27 +35,27 @@ instance Show Nat where
 instance Eq Nat where
 
     (==) Zero Zero         = True
-    (==) Zero (Succ _)     = False
-    (==) (Succ _) Zero     = False
-    (==) (Succ x) (Succ y) = (==) x y 
+    (==) Zero _            = False
+    (==) _    Zero         = False
+    (==) (Succ x) (Succ y) = x == y 
 
 instance Ord Nat where
 
     (<=) Zero Zero         = True
-    (<=) Zero (Succ _)     = True 
-    (<=) (Succ _) Zero     = False
-    (<=) (Succ x) (Succ y) = (<=) x y
+    (<=) Zero _            = True 
+    (<=) _    Zero         = False
+    (<=) (Succ x) (Succ y) = x <= y
 
     -- Ord does not REQUIRE defining min and max.
     -- Howevener, you should define them WITHOUT using (<=).
     -- Both are binary functions: max m n = ..., etc.
 
-    min Zero Zero         = Zero
-    min Zero (Succ _)     = Zero
-    min (Succ x) (Succ y) = min x y 
+    min Zero     _        = Zero
+    min _        Zero     = Zero
+    min (Succ x) (Succ y) = Succ (min x y)
 
-    max Zero Zero         = Zero
-    max Zero (Succ x)     = Succ x
+    max Zero     x        = x
+    max x        Zero     = x
     max (Succ x) (Succ y) = max x y
 
 isZero :: Nat -> Bool
@@ -63,59 +63,65 @@ isZero x = (x == Zero)
 
 -- pred is the predecessor but we define zero's to be zero
 pred :: Nat -> Nat
-pred Zero   = Zero
+pred Zero     = Zero
 pred (Succ x) = x
 
 even :: Nat -> Bool
-even Zero = True
+even Zero     = True
 even (Succ x) = odd x 
 
 odd :: Nat -> Bool
-odd Zero = False
+odd Zero     = False
 odd (Succ x) = even x
 
 -- addition
 (<+>) :: Nat -> Nat -> Nat
-(<+>) Zero Zero  = Zero
-(<+>) x (Succ y) = Succ ((<+>) x y)
-(<+>) (Succ x) y = Succ ((<+>) x y)
+(<+>) Zero x     = x
+(<+>) x Zero     = x
+(<+>) x (Succ y) = Succ (x <+> y)
 
 -- This is called the dotminus or monus operator
 -- (also: proper subtraction, arithmetic subtraction, ...).
 -- It behaves like subtraction, except that it returns 0
 -- when "normal" subtraction would return a negative number.
 (<->) :: Nat -> Nat -> Nat
-(<->) Zero _    = Zero
-(<->) x    Zero = x
+(<->) Zero _            = Zero
+(<->) x    Zero         = x
 (<->) (Succ x) (Succ y) = (<->) x y
 
 -- multiplication
 (<*>) :: Nat -> Nat -> Nat
-(<*>) (Succ Zero) y = y 
+(<*>) (Succ Zero) x = x 
 (<*>) x (Succ Zero) = x 
-(<*>) (Succ x) y = (<*>) x ((<+>) y y)
-(<*>) _ _ = Zero
+(<*>) x (Succ y)    = x <+> (x <*> y)
+(<*>) _ _           = Zero
 
 -- exponentiation
 (<^>) :: Nat -> Nat -> Nat
-(<^>) _ Zero = (Succ Zero)
+(<^>) _ Zero        = (Succ Zero)
+(<^>) Zero _        = Zero
 (<^>) x (Succ Zero) = x
-(<^>) x (Succ y) = (<^>) ((<*>) x x) y
+(<^>) x (Succ y)    = (<^>) ((<*>) x x) y
 
 -- quotient
 (</>) :: Nat -> Nat -> Nat
+(</>) x Zero        = error "division by zero."
+(</>) Zero x        = Zero
 (</>) x (Succ Zero) = x
-(</>) x (Succ y) = (</>) ((<->) x (Succ y)) y
-(</>) _ _ = Zero
+(</>) x y           = if x < y then Zero
+                      else Succ ( (x <-> y) </> y )
 
 -- remainder
 (<%>) :: Nat -> Nat -> Nat
-(<%>) x y = (<->) x ((<*>) y ((</>) x y))
--- divisao euclidiana tem algo coisado aq
-
+(<%>) Zero x = Zero </> x
+(<%>) x Zero = x </> Zero
+(<%>) x y    = if x < y then x
+               else (x <-> y) <%> y
+    
 -- divides
 (<|>) :: Nat -> Nat -> Bool
-(<|>) = undefined
+(<|>) x y = if (x <%> y == Zero) then True 
+            else False
 
 divides = (<|>)
 
@@ -123,16 +129,20 @@ divides = (<|>)
 -- x `absDiff` y = |x - y|
 -- (Careful here: this - is the real minus operator!)
 absDiff :: Nat -> Nat -> Nat
-absDiff = undefined
+absDiff Zero x            = x
+absDiff x Zero            = x
+absDiff (Succ x) (Succ y) = absDiff x y
 
 (|-|) = absDiff
 
 factorial :: Nat -> Nat
-factorial = undefined
+factorial Zero     = (Succ Zero)
+factorial (Succ x) = (Succ x) <*> (factorial x)
 
 -- signum of a number (-1, 0, or 1)
 sg :: Nat -> Nat
-sg = undefined
+sg Zero = Zero
+sg _    = Succ Zero
 
 -- lo b a is the floor of the logarithm base b of a
 lo :: Nat -> Nat -> Nat
@@ -145,10 +155,12 @@ lo = undefined
 --
 
 toNat :: Integral a => a -> Nat
-toNat = undefined
+toNat 0 = Zero
+toNat (Succ x) = Succ (toNat x)
 
 fromNat :: Integral a => Nat -> a
-fromNat = undefined
+fromNat Zero = 0
+fromNat (Succ x) = 1 + (fromNat x)
 
 
 -- Obs: we can now easily make Nat an instance of Num.
@@ -160,7 +172,6 @@ instance Num Nat where
     abs n = n
     signum = sg
     fromInteger x
-        | x < 0     = undefined
-        | x == 0    = undefined
-        | otherwise = undefined
+        | x <= 0    = Zero
+        | otherwise = toNat x 
 
