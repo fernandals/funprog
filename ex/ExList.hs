@@ -89,14 +89,14 @@ drop 0 xs = xs
 drop x ys = reverse (take x (reverse ys)) 
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
-takeWhile f (x:xs) = 
-    if (f x) then [x] ++ (takeWhile f xs)
-    else []
+takeWhile f []     = []
+takeWhile f (x:xs) = if (f x) then [x] ++ (takeWhile f xs)
+                     else []
 
 dropWhile :: (a -> Bool) -> [a] -> [a]
-dropWhile f all@(x:xs) =
-    if (f x) then dropWhile f xs
-    else all
+dropWhile f []         = []
+dropWhile f all@(x:xs) = if (f x) then dropWhile f xs
+                         else all
 
 -- tails
 
@@ -108,13 +108,28 @@ init xs = take (length xs - 1) xs
 
 -- subsequences
 
--- any
--- all
+any :: (a -> Bool) -> [a] -> Bool
+any f []     = False
+any f (x:xs) = if f x then True
+               else any f xs
 
--- and
--- or
+all :: (a -> Bool) -> [a] -> Bool
+all f [] = True
+all f (x:xs) = if f x then all f xs
+               else False
 
--- concat
+and :: [Bool] -> Bool
+and []     = True
+and (x:xs) = if x then and xs
+             else False
+
+or :: [Bool] -> Bool
+or []     = False
+or (x:xs) = if x then True
+            else or xs
+
+--concat :: [[a]] -> [a]
+--concat x = (head x) ++ concat (tail x)
 
 -- elem using the funciton 'any' above
 
