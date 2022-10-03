@@ -58,7 +58,6 @@ xs ++ [] = xs
 -- (what?!)
 infixr 5 ++
 
--- (snoc is cons written backwards)
 snoc :: a -> [a] -> [a]
 snoc x [] = [x]
 snoc x ys = ys ++ [x]
@@ -67,7 +66,6 @@ snoc x ys = ys ++ [x]
 (<:) [] x = snoc x []
 (<:) xs y = snoc y xs
 
--- different implementation of (++)
 (+++) :: [a] -> [a] -> [a]
 xs +++ []     = xs
 xs +++ [y]    = xs <: y
@@ -114,7 +112,7 @@ any f (x:xs) = if f x then True
                else any f xs
 
 all :: (a -> Bool) -> [a] -> Bool
-all f [] = True
+all f []     = True
 all f (x:xs) = if f x then all f xs
                else False
 
@@ -128,38 +126,71 @@ or []     = False
 or (x:xs) = if x then True
             else or xs
 
---concat :: [[a]] -> [a]
---concat x = (head x) ++ concat (tail x)
+concat :: [[a]] -> [a]
+concat [] = []
+concat x  = (head x) ++ concat (tail x)
 
--- elem using the funciton 'any' above
+elem :: Eq a => a -> [a] -> Bool
+elem x ys = any (x==) ys
 
--- elem': same as elem but elementary definition
--- (without using other functions except (==))
+elem' :: Eq a => a -> [a] -> Bool
+elem' x []     = False
+elem' x (y:ys) = if (x == y) then True
+                 else elem' x ys
 
--- (!!)
+(!!) :: [a] -> Int -> a
+[] !! x     = error "Out of range..."
+(x:xs) !! 0 = x
+(x:xs) !! y = xs !! (y-1)
 
--- filter
--- map
+filter :: (a -> Bool) -> [a] -> [a]
+filter f []     = []
+filter f (x:xs) = if (f x) then [x] ++ filter f xs
+                  else filter f xs
 
--- cycle
--- repeat
--- replicate
+map :: (a -> b) -> [a] -> [b]
+map f []     = []
+map f (x:xs) = [f x] ++ map f xs
+
+--cycle :: [a] -> [a]
+--cycle x = x +++ (cycle x)
+
+--repeat :: a -> [a]
+--repeat x = [x] +++ (repeat x)
+
+replicate :: Int -> a -> [a]
+replicate 0 _ = []
+replicate x y = [y] +++ (replicate (x-1) y)
 
 -- isPrefixOf
 -- isInfixOf
 -- isSuffixOf
 
--- zip
--- zipWith
+zip :: [a] -> [b] -> [(a,b)]
+zip _ []          = []
+zip [] _          = []
+zip (x:xs) (y:ys) = [(x,y)] +++ zip xs ys
 
--- intercalate
+zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
+zipWith f _ []          = []
+zipWith f [] _          = []
+zipWith f (x:xs) (y:ys) = [f x y] +++ zipWith f xs ys
+
+intercalate :: [a] -> [[a]] -> [a]
+intercalate _ [] = []
+intercalate xs [[ys]] = [ys]
+intercalate xs (y:ys) = y +++ xs +++ (intercalate xs ys)
+
 -- nub
 
--- splitAt
 -- what is the problem with the following?:
 -- splitAt n xs  =  (take n xs, drop n xs)
+splitAt :: Int -> [a] -> ([a], [a])
+splitAt x ys = (take x ys,
+                take ((length ys)-x) (reverse ys)) 
 
 -- break
+--- filter ++ nub?
 
 -- lines
 -- words
@@ -171,6 +202,7 @@ or (x:xs) = if x then True
 -- checks if the letters of a phrase form a palindrome (see below for examples)
 palindrome :: String -> Bool
 palindrome = undefined
+-- nub ++ length ?
 
 {-
 
