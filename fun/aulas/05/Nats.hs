@@ -5,6 +5,7 @@ data Nat = Zero | Succ Nat
 
 instance (Show Nat) where
     show Zero     = "O"
+    -- show (Succ x) = 'S' : show x
     show (Succ x) = "S" ++ show x 
 
 plus :: Nat -> Nat -> Nat
