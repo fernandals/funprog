@@ -156,7 +156,7 @@ lo = undefined
 
 toNat :: Integral a => a -> Nat
 toNat 0 = Zero
-toNat (Succ x) = Succ (toNat x)
+toNat x = Succ (toNat (x-1))
 
 fromNat :: Integral a => Nat -> a
 fromNat Zero = 0
