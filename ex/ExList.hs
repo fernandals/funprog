@@ -22,11 +22,15 @@ import qualified Data.Char as C
 -- You MUST NOT use ANY of these in your code
 
 head :: [a] -> a
-head []  = error "Empty list!"
+head []    = error "Empty list!"
 head (x:_) = x 
 
+last :: [a] -> a
+last [] = error "Empty list!"
+last xs = xs !! (length xs - 1)
+
 tail :: [a] -> [a]
-tail []    = error "Empty list!"
+tail []     = error "Empty list!"
 tail (_:xs) = xs
 
 null :: [a] -> Bool
@@ -35,24 +39,24 @@ null _  = False
 
 length :: Integral i => [a] -> i
 length []     = 0
-length (_:xs) = 1 + (length xs)
+length (_:xs) = 1 + length xs
 
 sum :: Num a => [a] -> a
 sum []     = 0
-sum (x:xs) = x + (sum xs)
+sum (x:xs) = x + sum xs
 
 product :: Num a => [a] -> a
 product []     = 1
-product (x:xs) = x * (product xs)
+product (x:xs) = x * product xs
 
 reverse :: [a] -> [a]
 reverse []     = []
-reverse (x:xs) = (reverse xs) ++ [x] 
+reverse (x:xs) = reverse xs ++ [x] 
 
 (++) :: [a] -> [a] -> [a]
-xs ++ [] = xs
-[] ++ xs = xs
-(x:xs) ++ ys = (x : (xs ++ ys))
+xs     ++ [] = xs
+[]     ++ xs = xs
+(x:xs) ++ ys = x : (xs ++ ys)
 
 -- right-associative for performance!
 -- (what?!)
@@ -75,20 +79,33 @@ xs +++ (y:ys) = (xs +++ [y]) +++ ys
 -- (hmm?)
 infixl 5 +++
 
--- minimum :: Ord a => [a] -> a
--- maximum :: Ord a => [a] -> a
+minimum :: Ord a => [a] -> a
+minimum []  = error "Empty list :/"
+minimum (x:xs) = min x xs
+                 where min a bs
+                         | null bs     = a
+                         | head bs < a = min (head bs) (tail bs)
+                         | otherwise   = min a (tail bs)
+
+maximum :: Ord a => [a] -> a
+maximum [] = error "Empty list ;("
+maximum (x:xs) = max x xs
+                 where max a bs
+                         | null bs     = a
+                         | head bs > a = max (head bs) (tail bs)
+                         | otherwise   = max a (tail bs)
 
 take :: Int -> [a] -> [a]
 take 0 _      = []
-take x (y:ys) = [y] ++ take (x-1) ys
+take x (y:ys) = y : take (x-1) ys
 
 drop :: Int -> [a] -> [a]
 drop 0 xs = xs
-drop x ys = reverse (take x (reverse ys)) 
+drop x ys = drop (x-1) (tail ys) 
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile f []     = []
-takeWhile f (x:xs) = if (f x) then [x] ++ (takeWhile f xs)
+takeWhile f (x:xs) = if (f x) then x : (takeWhile f xs)
                      else []
 
 dropWhile :: (a -> Bool) -> [a] -> [a]
@@ -96,16 +113,26 @@ dropWhile f []         = []
 dropWhile f all@(x:xs) = if (f x) then dropWhile f xs
                          else all
 
--- tails
+tails :: [a] -> [[a]]
+tails xs = drops 0 xs
+           where drops n ys
+                   | n == length ys = drop n ys : []
+                   | otherwise      = drop n ys : drops (n+1) ys
 
 init :: [a] -> [a]
 init [] = []
 init xs = take (length xs - 1) xs
 
--- inits
--- inits [1,2,3,4] = [[],[1],[1,2],[1,2,3],[1,2,3,4]]
+inits :: [a] -> [[a]]
+inits xs = takes 0 xs
+           where takes n ys 
+                   | n == length ys = take n ys : []
+                   | otherwise      = take n ys : takes (n+1) ys
 
 -- subsequences
+--subsequences :: [a] -> [[a]]
+--subsequences [] = [[]]
+--subsequences xs = 
 
 any :: (a -> Bool) -> [a] -> Bool
 any f []     = False
@@ -140,58 +167,64 @@ elem' x (y:ys) = if (x == y) then True
                  else elem' x ys
 
 (!!) :: [a] -> Int -> a
-[] !! x     = error "Out of range..."
-(x:xs) !! 0 = x
-(x:xs) !! y = xs !! (y-1)
+[]     !! _ = error "Out of range..."
+(x:_)  !! 0 = x
+(_:xs) !! y = xs !! (y-1)
 
 filter :: (a -> Bool) -> [a] -> [a]
 filter f []     = []
-filter f (x:xs) = if (f x) then [x] ++ filter f xs
+filter f (x:xs) = if (f x) then x : filter f xs
                   else filter f xs
 
 map :: (a -> b) -> [a] -> [b]
 map f []     = []
-map f (x:xs) = [f x] ++ map f xs
+map f (x:xs) = f x : map f xs
 
---cycle :: [a] -> [a]
---cycle x = x +++ (cycle x)
+cycle :: [a] -> [a]
+cycle (x:xs) = x : xs ++ cycle (x:xs)
 
---repeat :: a -> [a]
---repeat x = [x] +++ (repeat x)
+repeat :: a -> [a]
+repeat x = x : repeat x
 
 replicate :: Int -> a -> [a]
 replicate 0 _ = []
-replicate x y = [y] +++ (replicate (x-1) y)
+replicate n x = x : (replicate (n-1) x)
 
--- isPrefixOf
+isPrefixOf :: Eq a => [a] -> [a] -> Bool
+isPrefixOf xs ys = or $ map (xs ==) (inits ys)
+
 -- isInfixOf
--- isSuffixOf
+-- usar subsequences nesse aqui
+-- or $ map (xs ==) (subsequences ys)
+
+isSuffixOf :: Eq a => [a] -> [a] -> Bool
+isSuffixOf xs ys = or $ map (xs ==) (tails ys)
 
 zip :: [a] -> [b] -> [(a,b)]
-zip _ []          = []
-zip [] _          = []
 zip (x:xs) (y:ys) = [(x,y)] +++ zip xs ys
+zip _      _      = []
 
 zipWith :: (a -> b -> c) -> [a] -> [b] -> [c]
-zipWith f _ []          = []
-zipWith f [] _          = []
 zipWith f (x:xs) (y:ys) = [f x y] +++ zipWith f xs ys
+zipWith f _      _      = []
 
 intercalate :: [a] -> [[a]] -> [a]
-intercalate _ [] = []
-intercalate xs [[ys]] = [ys]
-intercalate xs (y:ys) = y +++ xs +++ (intercalate xs ys)
+intercalate [] xs  = concat xs
+intercalate xs []  = []
+intercalate _  [[x]] = [x]
+intercalate xs ys  = concat $ map (++xs) (init ys) <: last ys
 
--- nub
+nub :: Eq a => [a] -> [a]
+nub [] = []
+nub (x:xs) = x : (nub . filter (x/=)) xs
 
--- what is the problem with the following?:
--- splitAt n xs  =  (take n xs, drop n xs)
 splitAt :: Int -> [a] -> ([a], [a])
 splitAt x ys = (take x ys,
                 take ((length ys)-x) (reverse ys)) 
 
--- break
---- filter ++ nub?
+break :: (a -> Bool) -> [a] -> ([a],[a])
+break _ [] = ([],[])
+--break p xs = (filter p xs, filter naosei xs)
 
 -- lines
 -- words
