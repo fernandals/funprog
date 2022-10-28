@@ -7,7 +7,7 @@ fromFor :: Int -> Int -> [a] -> [a]
 fromFor n m = take m . drop n 
 
 fromTo :: Int -> Int -> [a] -> [a]
-fromTo n m = take (m - n + 1) . drop n 
+fromTo n m = fromFor n (m - n + 1)
 
 fromToThat :: Int -> Int -> (a -> Bool) -> [a] -> [a]
-fromToThat n m p = filter p . drop n . take (m + 1) 
+fromToThat n m p = filter p . fromTo n m 
