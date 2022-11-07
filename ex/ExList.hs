@@ -63,8 +63,8 @@ xs     ++ [] = xs
 infixr 5 ++
 
 snoc :: a -> [a] -> [a]
-snoc x [] = [x]
-snoc x ys = ys ++ [x]
+snoc x []     = [x]
+snoc x (y:ys) = y : snoc x ys
 
 (<:) :: [a] -> a -> [a]
 (<:) [] x = snoc x []
@@ -97,11 +97,13 @@ maximum (x:xs) = max x xs
 
 take :: Int -> [a] -> [a]
 take 0 _      = []
-take x (y:ys) = y : take (x-1) ys
+take _ []     = []
+take n (y:ys) = y : take (n-1) ys
 
 drop :: Int -> [a] -> [a]
-drop 0 xs = xs
-drop x ys = drop (x-1) (tail ys) 
+drop 0 xs     = xs
+drop _ []     = []
+drop n (_:ys) = drop (n-1) ys 
 
 takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile f []     = []
