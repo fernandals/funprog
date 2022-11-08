@@ -55,6 +55,9 @@ instance Ord Nat where
     max Zero     x        = x
     max x        Zero     = x
 
+infinite :: Nat
+infinite = Succ infinite
+
 isZero :: Nat -> Bool
 isZero x = (x == Zero)
 

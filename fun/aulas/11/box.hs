@@ -1,5 +1,7 @@
 module Box where
 
+---- construtor de tipo
+------------ construtor de dados
 data Box a = Box a
     deriving ( Show , Eq )
 
@@ -10,10 +12,10 @@ no :: Box Bool -> Box Bool
 no (Box True) = Box False
 no (Box False) = Box True
 
-bottom :: a
+bottom :: Bool 
 bottom = bottom
 
-boxBottom :: Box a
+boxBottom :: Box Bool 
 boxBottom = Box bottom
 
 --box :: a -> Box a
