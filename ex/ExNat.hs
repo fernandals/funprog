@@ -5,6 +5,7 @@ import Prelude
     ( Show(..)
     , Eq(..)
     , Ord(..)
+    , Enum(..)
     , Num(..)
     , Integral
     , Bool(..)
@@ -54,6 +55,15 @@ instance Ord Nat where
     max (Succ x) (Succ y) = Succ (max x y)
     max Zero     x        = x
     max x        Zero     = x
+
+instance Enum Nat where
+    toEnum   = undefined 
+    fromEnum = undefined 
+
+    enumFrom       x = x : enumFrom (x+1) 
+    enumFromTo     x = undefined
+    enumFromThen   x = undefined
+    enumFromThenTo x = undefined
 
 infinite :: Nat
 infinite = Succ infinite
@@ -130,7 +140,7 @@ divides = (<|>)
 absDiff :: Nat -> Nat -> Nat
 absDiff (Succ x) (Succ y) = absDiff x y
 absDiff _        x        = x
-absDiff x        _        = x
+--absDiff x        _        = x
 
 (|-|) = absDiff
 
