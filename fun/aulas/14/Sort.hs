@@ -8,6 +8,8 @@ module Sort
 sort :: Ord a => [a] -> [a]
 sort = undefined 
 
+--------- Merge Sort
+
 -- ASSUMPTION: xs and ys are sorted
 merge :: Ord a => [a] -> [a] -> [a]
 merge xs [] = xs
@@ -22,22 +24,47 @@ msort [z] = [z]
 msort zs  = merge (msort xs) (msort ys)
   where
     (xs, ys) = halve zs
---    (xs, ys) = splitAt midpoint zs
---    midpoint = length zs `div` 2
 
 halve :: [a] -> ([a], [a])
-halve [] = ([], []) 
-halve [x] = ([x], []) 
-halve (x:xs) = ( x : halfUp xs, []) 
-  where halfUp ys@(y:ys')
-          | null ys   = []
-          | otherwise = y : halfUp (init ys)
+halve []       = ([], [])
+halve [x]      = ([x], [])
+halve (x:y:xs) = (x:lxs, y:rxs)
+  where
+    (lxs, rxs) = halve xs
 
--- halve [1,2,3,4,5,6,7,8] = ([1,2,3,4], [5,6,7,8])
+-------- Quick Sort
 
 qsort :: Ord a => [a] -> [a]
-qsort = undefined
+qsort []     = []
+qsort (w:xs) = qsort small ++ [w] ++ qsort large
+  where
+    small = [ x | x <- xs, x <= w ]
+    --small = filter (<=w) xs
+    large = [ x | x <- xs, x > w ]
+    --large = filter (>w) xs
+
+------- Insertion Sort
 
 isort :: Ord a => [a] -> [a]
-isort = undefined
+isort []     = []
+isort (x:xs) = insert x (isort xs)
+
+-- ASSUMPTION: ys is sorted
+insert :: Ord a => a -> [a] -> [a]
+insert x [] = [x]
+insert x ys@(y:ys')
+  | x <= y = x : ys
+  | otherwise = y : insert x ys'
+
+-----------------------------------------------------
+  -- TESTING
+
+sorted :: Ord a => [a] -> Bool
+sorted (x:y:xs) = x <= y && sorted (y:xs)
+sorted _        = True
+
+prop_qsortLength xs = length xs == length (qsort xs)
+prop_qsortSorts xs  = sorted (qsort xs)
+prop_qsortQsort xs  = qsort xs == qsort (qsort xs)
+
 
