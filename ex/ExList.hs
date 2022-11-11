@@ -116,25 +116,21 @@ dropWhile f all@(x:xs) = if (f x) then dropWhile f xs
                          else all
 
 tails :: [a] -> [[a]]
-tails xs = drops 0 xs
-           where drops n ys
-                   | n == length ys = drop n ys : []
-                   | otherwise      = drop n ys : drops (n+1) ys
+tails [] = [[]]
+tails xs = xs : tails (tail xs)
 
 init :: [a] -> [a]
 init [] = []
 init xs = take (length xs - 1) xs
 
 inits :: [a] -> [[a]]
-inits xs = takes 0 xs
-           where takes n ys 
-                   | n == length ys = take n ys : []
-                   | otherwise      = take n ys : takes (n+1) ys
+inits []     = [[]]
+inits (x:xs) = [] : map (x:) (inits xs)
 
 -- subsequences
---subsequences :: [a] -> [[a]]
---subsequences [] = [[]]
---subsequences xs = 
+subsequences :: [a] -> [[a]]
+subsequences []     = [[]]
+subsequences (x:xs) = map (x:) (subsequences xs) ++ (subsequences xs)
 
 any :: (a -> Bool) -> [a] -> Bool
 any f []     = False
